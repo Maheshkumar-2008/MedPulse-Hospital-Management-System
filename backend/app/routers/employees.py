@@ -3,6 +3,7 @@ Hospital Employee Management Router.
 """
 
 from datetime import datetime
+import secrets
 from typing import Optional, List
 from fastapi import APIRouter, HTTPException, Depends, Query, status
 from backend.app.database import get_db
@@ -133,8 +134,9 @@ async def create_employee(emp: EmployeeCreate):
     doc["created_at"] = datetime.now().isoformat()
     emp_coll.insert_one(doc)
     
-    # Also create approved user account
-    default_pw_hash = hash_password("Staff@123")
+    # Also create approved user account with cryptographically random temporary password
+    initial_password = f"Staff@{secrets.token_hex(4)}"
+    default_pw_hash = hash_password(initial_password)
     user_doc = {
         "employee_id": emp.employee_id,
         "full_name": emp.full_name,
@@ -149,7 +151,11 @@ async def create_employee(emp: EmployeeCreate):
     }
     users_coll.insert_one(user_doc)
     
-    return {"message": "Employee created successfully with active credentials.", "employee": doc}
+    return {
+        "message": "Employee created successfully with active credentials.",
+        "employee": doc,
+        "temporary_password": initial_password
+    }
 
 @router.put("/{employee_id}", dependencies=[Depends(require_roles(["Admin"]))])
 async def update_employee(employee_id: str, updates: EmployeeUpdate):

@@ -1,9 +1,42 @@
 /**
  * API Service for MedPulse Hospital Management System.
  * Connects React UI to FastAPI backend with JWT Bearer Token.
+ * Production Backend: https://medpulse-hospital-management-system-wjy9.onrender.com
  */
 
-const API_BASE = '/api/v1';
+export const RENDER_BACKEND_URL = 'https://medpulse-hospital-management-system-wjy9.onrender.com';
+
+/**
+ * Returns the normalized backend API base URL.
+ * Guarantees the `/api/v1` prefix is always present and never duplicated.
+ */
+export function getApiBaseUrl() {
+  let url = (import.meta.env.VITE_API_URL || '').trim();
+
+  // If unset, detect whether running on Vercel / production or local development
+  if (!url) {
+    const isVercelOrCloud = typeof window !== 'undefined' && (
+      window.location.hostname.includes('vercel.app') ||
+      (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1')
+    );
+
+    if (import.meta.env.PROD || isVercelOrCloud) {
+      url = `${RENDER_BACKEND_URL}/api/v1`;
+    } else {
+      return '/api/v1'; // Local Vite dev server proxy
+    }
+  }
+
+  // Remove any trailing slashes
+  url = url.replace(/\/+$/, '');
+
+  // Guard against missing /api/v1 prefix
+  if (!url.endsWith('/api/v1')) {
+    url = `${url}/api/v1`;
+  }
+
+  return url;
+}
 
 export const getAuthToken = () => {
   return localStorage.getItem('medpulse_token') || '';
@@ -46,29 +79,89 @@ async function apiRequest(endpoint, method = 'GET', body = null) {
     options.body = JSON.stringify(body);
   }
 
-  const response = await fetch(`${API_BASE}${endpoint}`, options);
+  const baseUrl = getApiBaseUrl();
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const fullUrl = `${baseUrl}${cleanEndpoint}`;
+
+  let response;
+  try {
+    response = await fetch(fullUrl, options);
+  } catch (networkErr) {
+    throw new Error(
+      `Network connection failure: Unable to connect to MedPulse backend (${baseUrl}). ` +
+      `Please check your internet connection and verify that CORS is permitted.`
+    );
+  }
 
   if (response.status === 401) {
-    // If unauthorized, redirect to login state
-    clearAuthToken();
-    window.dispatchEvent(new Event('auth-expired'));
+    // Only dispatch expired token event for authenticated routes, not initial login attempts
+    if (!endpoint.includes('/auth/login')) {
+      clearAuthToken();
+      window.dispatchEvent(new Event('auth-expired'));
+    }
   }
 
   if (!response.ok) {
-    let errorDetail = 'API request failed';
+    let errorDetail = '';
     try {
       const errJson = await response.json();
-      errorDetail = errJson.detail || errJson.message || errorDetail;
-    } catch (e) {
-      errorDetail = `Error ${response.status}: ${response.statusText}`;
+      if (Array.isArray(errJson.detail)) {
+        // FastAPI / Pydantic 422 validation errors
+        errorDetail = errJson.detail
+          .map((d) => `${d.loc ? d.loc[d.loc.length - 1] : 'Field'}: ${d.msg}`)
+          .join(', ');
+      } else if (typeof errJson.detail === 'string') {
+        errorDetail = errJson.detail;
+      } else if (errJson.message) {
+        errorDetail = errJson.message;
+      }
+    } catch (_) {
+      // Non-JSON error body (e.g. Vercel HTML 404 or gateway error page).
+      // If the response is not JSON, the request likely hit the wrong server.
+      if (response.status === 404) {
+        errorDetail = 'Unable to reach the hospital backend server. Please try again or contact your system administrator.';
+      }
     }
-    throw new Error(errorDetail);
+
+    if (!errorDetail) {
+      switch (response.status) {
+        case 400:
+          errorDetail = 'Invalid request. Please check the supplied parameters.';
+          break;
+        case 401:
+          errorDetail = 'Invalid credentials. Please check your Employee ID, Full Name, and Password or OTP.';
+          break;
+        case 403:
+          errorDetail = 'Access denied. Your employee account is awaiting administrator approval or has been deactivated.';
+          break;
+        case 404:
+          errorDetail = 'Unable to reach the hospital backend server. Please try again or contact your system administrator.';
+          break;
+        case 422:
+          errorDetail = 'Validation error. One or more required fields are missing or invalid.';
+          break;
+        case 500:
+        case 502:
+        case 503:
+          errorDetail = 'The hospital server encountered an issue. Please try again shortly.';
+          break;
+        default:
+          errorDetail = `Something went wrong (${response.status}). Please try again.`;
+      }
+    }
+
+    const err = new Error(errorDetail);
+    err.status = response.status;
+    throw err;
   }
 
   return response.json();
 }
 
 export const api = {
+  // Base URL helper
+  getBaseUrl: getApiBaseUrl,
+
   // Auth
   login: (data) => apiRequest('/auth/login', 'POST', data),
   registerStaff: (data) => apiRequest('/auth/register-request', 'POST', data),
@@ -135,7 +228,7 @@ export const api = {
   getRevenueSummary: () => apiRequest('/billing/revenue-summary'),
   generateBill: (data) => apiRequest('/billing/generate', 'POST', data),
   recordPayment: (data) => apiRequest('/billing/pay', 'POST', data),
-  getReceiptUrl: (billId) => `${API_BASE}/billing/receipt/${billId}`,
+  getReceiptUrl: (billId) => `${getApiBaseUrl()}/billing/receipt/${billId}`,
 
   // Analytics & KPIs
   getDashboardKPIs: () => apiRequest('/analytics/dashboard-kpis'),
@@ -151,5 +244,5 @@ export const api = {
 
   // Reports Download URL builder
   getReportDownloadUrl: (reportType, format = 'pdf') => 
-    `${API_BASE}/reports/download?report_type=${reportType}&format=${format}`
+    `${getApiBaseUrl()}/reports/download?report_type=${reportType}&format=${format}`
 };

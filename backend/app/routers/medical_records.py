@@ -25,7 +25,7 @@ def generate_record_id(rec_coll) -> str:
                 pass
     return f"REC-{max_num + 1:04d}"
 
-@router.get("/")
+@router.get("/", dependencies=[Depends(require_roles(["Admin", "Doctor", "Nurse"]))])
 async def get_all_records(
     patient_id: Optional[str] = None,
     doctor_id: Optional[str] = None,

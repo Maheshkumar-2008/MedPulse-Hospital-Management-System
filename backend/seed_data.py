@@ -18,6 +18,10 @@ from backend.app.auth.security import hash_password
 from machine_learning.dataset_generator import generate_patients, generate_employees, generate_beds, generate_all
 
 def seed_database():
+    if settings.is_production:
+        print("[Seeder] Production environment detected. Automatic seeding is disabled to protect existing patient records.")
+        return
+
     print("[Seeder] Initializing Hospital Database Seed...")
     db = get_db()
     

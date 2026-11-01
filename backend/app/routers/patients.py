@@ -79,7 +79,7 @@ async def get_patient_profile(patient_id: str, current_user: dict = Depends(get_
         "billing": bills
     }
 
-@router.post("/")
+@router.post("/", dependencies=[Depends(require_roles(["Admin", "Receptionist", "Nurse", "Doctor"]))])
 async def register_patient(patient: PatientCreate, current_user: dict = Depends(get_current_user)):
     db = get_db()
     pat_coll = db.get_collection("patients")
@@ -112,7 +112,7 @@ async def register_patient(patient: PatientCreate, current_user: dict = Depends(
     
     return {"message": "Patient registered successfully", "patient": doc}
 
-@router.put("/{patient_id}")
+@router.put("/{patient_id}", dependencies=[Depends(require_roles(["Admin", "Receptionist", "Doctor", "Nurse"]))])
 async def update_patient(patient_id: str, updates: PatientUpdate, current_user: dict = Depends(get_current_user)):
     db = get_db()
     pat_coll = db.get_collection("patients")

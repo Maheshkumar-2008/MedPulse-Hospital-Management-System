@@ -108,6 +108,19 @@ def run_task_3_fe_be_comm():
     assert health_data["status"] == "healthy"
     print(f"Backend Health Response: {health_data}")
 
+    # Test Dedicated Database Health-Check Endpoint
+    db_h_res = client.get("/api/v1/health/database")
+    assert db_h_res.status_code == 200, f"Expected 200 for /health/database, got {db_h_res.status_code}"
+    db_h_data = db_h_res.json()
+    assert "status" in db_h_data
+    assert "database" in db_h_data
+    # Security requirement: minimal health info without internal pool, db name, endpoint, or error leaks
+    assert "connection_pool" not in db_h_data, "Security alert: connection_pool leaked in health endpoint"
+    assert "database_name" not in db_h_data, "Security alert: database_name leaked in health endpoint"
+    assert "endpoint" not in db_h_data, "Security alert: endpoint leaked in health endpoint"
+    assert "last_error" not in db_h_data, "Security alert: last_error leaked in health endpoint"
+    print(f"Dedicated DB Health Check: Engine={db_h_data.get('engine')}, Status={db_h_data.get('status')}")
+
     # Root API summary
     root_res = client.get("/")
     assert root_res.status_code == 200

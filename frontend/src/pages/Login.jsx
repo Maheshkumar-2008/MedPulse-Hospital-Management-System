@@ -12,10 +12,10 @@ export const Login = () => {
   const [loginMethod, setLoginMethod] = useState('password'); // 'password' | 'otp'
 
   // Login form state
-  const [fullName, setFullName] = useState('Dr. Rajesh Varma');
-  const [mobileNumber, setMobileNumber] = useState('9848022331');
-  const [employeeId, setEmployeeId] = useState('EMP-001');
-  const [password, setPassword] = useState('Admin@123');
+  const [fullName, setFullName] = useState('');
+  const [mobileNumber, setMobileNumber] = useState('');
+  const [employeeId, setEmployeeId] = useState('');
+  const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
   const [otpSentMsg, setOtpSentMsg] = useState('');
 
@@ -63,8 +63,12 @@ export const Login = () => {
     setError('');
     try {
       const res = await api.requestOtp(mobileNumber);
-      setOtpSentMsg(res.message + ' (Demo verification code: ' + res.demo_otp_hint + ')');
-      setOtp(res.demo_otp_hint);
+      if (res.demo_otp_hint) {
+        setOtpSentMsg(`${res.message} (Verification code: ${res.demo_otp_hint})`);
+        setOtp(res.demo_otp_hint);
+      } else {
+        setOtpSentMsg(res.message);
+      }
     } catch (e) {
       setError(e.message);
     } finally {
@@ -178,7 +182,8 @@ export const Login = () => {
             </div>
           </div>
 
-          {/* Quick Demo Credentials Switcher */}
+          {/* Quick Demo Credentials Switcher — Only visible in local development builds */}
+          {import.meta.env.DEV && (
           <div className="mt-8 pt-6 border-t border-white/15 relative z-10">
             <p className="text-[11px] font-bold uppercase tracking-wider text-sky-200/90 mb-2">
               Select Demo Staff Profile:
@@ -218,6 +223,7 @@ export const Login = () => {
               </button>
             </div>
           </div>
+          )}
         </div>
 
         {/* Right Authentication Form Panel */}

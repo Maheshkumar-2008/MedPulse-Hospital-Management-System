@@ -10,7 +10,7 @@ from fastapi.responses import FileResponse
 from backend.app.database import get_db
 from backend.app.config import settings
 from backend.app.models.schemas import BillingCreate, PaymentRecord
-from backend.app.auth.dependencies import get_current_user
+from backend.app.auth.dependencies import get_current_user, require_roles
 
 router = APIRouter(prefix="/billing", tags=["Billing & Payments"])
 
@@ -73,7 +73,7 @@ async def get_revenue_summary(current_user: dict = Depends(get_current_user)):
         "pending_invoices_count": sum(1 for b in bills if b.get("payment_status") == "Pending")
     }
 
-@router.post("/generate")
+@router.post("/generate", dependencies=[Depends(require_roles(["Admin", "Receptionist"]))])
 async def generate_bill(bill_in: BillingCreate, current_user: dict = Depends(get_current_user)):
     db = get_db()
     bill_coll = db.get_collection("billing")
@@ -102,7 +102,7 @@ async def generate_bill(bill_in: BillingCreate, current_user: dict = Depends(get
     bill_coll.insert_one(doc)
     return {"message": "Invoice generated successfully.", "bill": doc}
 
-@router.post("/pay")
+@router.post("/pay", dependencies=[Depends(require_roles(["Admin", "Receptionist"]))])
 async def record_payment(payment: PaymentRecord, current_user: dict = Depends(get_current_user)):
     db = get_db()
     bill_coll = db.get_collection("billing")

@@ -11,6 +11,7 @@ import copy
 from typing import Dict, Any, List, Optional
 from datetime import datetime
 from backend.app.config import settings
+from backend.app.db.mongodb import mongo_client_manager
 
 class JSONCollection:
     def __init__(self, name: str, filepath: str):
@@ -131,28 +132,114 @@ class DatabaseManager:
         self._init_db()
 
     def _init_db(self):
-        if settings.STORAGE_MODE in ["mongo", "auto"]:
-            try:
-                import pymongo
-                client = pymongo.MongoClient(settings.MONGODB_URI, serverSelectionTimeoutMS=1500)
-                client.server_info()  # Trigger connection check
-                self.mongo_client = client
-                self.mongo_db = client[settings.DATABASE_NAME]
+        storage_mode = (os.getenv("STORAGE_MODE") or settings.STORAGE_MODE or "auto").strip().lower()
+        is_prod = settings.is_production
+
+        # Requirement 3: In STORAGE_MODE=json, permit JSON storage only in development.
+        if storage_mode == "json":
+            if is_prod:
+                raise RuntimeError(
+                    "Production Database Safety: STORAGE_MODE='json' is strictly forbidden in production. "
+                    "A live MongoDB connection is required."
+                )
+            self.use_mongo = False
+            self.mongo_client = None
+            self.mongo_db = None
+            return
+
+        # Attempt MongoDB connection for 'mongo' and 'auto' modes
+        connected = mongo_client_manager.connect()
+
+        # Requirement 1: In STORAGE_MODE=mongo, if MongoDB connection fails, raise RuntimeError and prevent application startup.
+        if storage_mode == "mongo":
+            if not connected:
+                raise RuntimeError(
+                    "Production Database Safety: Failed to connect to MongoDB with STORAGE_MODE='mongo'. "
+                    "Application startup aborted."
+                )
+            self.use_mongo = True
+            self.mongo_client = mongo_client_manager.client
+            self.mongo_db = mongo_client_manager.db
+            return
+
+        # Requirement 2 & 4: In STORAGE_MODE=auto
+        if storage_mode == "auto":
+            if connected:
                 self.use_mongo = True
-                print(f"[Database] Connected to live MongoDB at {settings.MONGODB_URI}")
-            except Exception as e:
+                self.mongo_client = mongo_client_manager.client
+                self.mongo_db = mongo_client_manager.db
+            else:
+                # Requirement 2: In ENVIRONMENT=production, never allow JSON fallback, including when STORAGE_MODE=auto.
+                if is_prod:
+                    raise RuntimeError(
+                        "Production Database Safety: MongoDB connection failed in production environment. "
+                        "JSON fallback is strictly disabled in production. Application startup aborted."
+                    )
+                # Requirement 4: In STORAGE_MODE=auto, permit JSON fallback only in development.
                 self.use_mongo = False
-                print(f"[Database] MongoDB not reachable ({e}). Gracefully falling back to Persistent JSON Store.")
+                self.mongo_client = None
+                self.mongo_db = None
+            return
+
+        # Unrecognized storage mode
+        if is_prod:
+            raise RuntimeError(
+                f"Production Database Safety: Unrecognized STORAGE_MODE='{storage_mode}' in production."
+            )
+        else:
+            self.use_mongo = False
+            self.mongo_client = None
+            self.mongo_db = None
 
     def get_collection(self, name: str):
+        """
+        Retrieves a database collection.
+        Requirement 5: In production, strictly prohibits returning JSONCollection.
+        """
         if self.use_mongo and self.mongo_db is not None:
             return self.mongo_db[name]
-        
+
+        # Enforce production safety: production environment MUST NOT access JSONCollection
+        if settings.is_production:
+            raise RuntimeError(
+                f"Production Database Safety: Cannot return JSONCollection for '{name}' in production environment. "
+                "MongoDB connection is required."
+            )
+
+        # Requirement 7: Preserve existing MongoDB and JSON collection behaviour where permitted (development).
         if name not in self.json_collections:
             file_path = os.path.join(settings.DATA_DIR, f"{name}.json")
             self.json_collections[name] = JSONCollection(name, file_path)
         return self.json_collections[name]
 
+    def get_health(self) -> Dict[str, Any]:
+        """
+        Requirement 6: Returns minimal health information without database names,
+        endpoints, connection pool details, or internal errors.
+        """
+        storage_mode = (os.getenv("STORAGE_MODE") or settings.STORAGE_MODE or "auto").strip().lower()
+        if self.use_mongo and self.mongo_db is not None:
+            status = "healthy"
+            database_state = "active"
+            connected = True
+            engine = "mongodb"
+        elif not settings.is_production and storage_mode in ["auto", "json"]:
+            status = "healthy"
+            database_state = "fallback"
+            connected = False
+            engine = "persistent_json_store"
+        else:
+            status = "unhealthy"
+            database_state = "offline"
+            connected = False
+            engine = "unavailable"
+
+        return {
+            "status": status,
+            "database": database_state,
+            "connected": connected,
+            "engine": engine
+        }
 
 db_manager = DatabaseManager()
 

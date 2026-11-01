@@ -24,22 +24,33 @@ def hash_password(password: str) -> str:
     """Hashes a plaintext password using bcrypt directly or salted SHA-256."""
     if bcrypt:
         try:
-            salt = bcrypt.gensalt()
+            salt = bcrypt.gensalt(rounds=12)
             return bcrypt.hashpw(password.encode("utf-8"), salt).decode("utf-8")
         except Exception:
             pass
-    # Reliable salted fallback
-    salt = "hospital_medpulse_salt_2026"
-    return "sha256$" + hashlib.sha256((salt + password).encode("utf-8")).hexdigest()
+    # Cryptographically secure random per-hash salt fallback
+    salt = secrets.token_hex(16)
+    hashed = hashlib.sha256((salt + password).encode("utf-8")).hexdigest()
+    return f"sha256${salt}${hashed}"
 
 get_password_hash = hash_password
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verifies a plaintext password against its stored hash."""
+    """Verifies a plaintext password against its stored hash using constant-time comparison."""
+    if not plain_password or not hashed_password:
+        return False
+
     if hashed_password.startswith("sha256$"):
-        salt = "hospital_medpulse_salt_2026"
-        expected = "sha256$" + hashlib.sha256((salt + plain_password).encode("utf-8")).hexdigest()
-        return secrets.compare_digest(expected, hashed_password)
+        parts = hashed_password.split("$")
+        if len(parts) == 3:
+            salt = parts[1]
+            expected = f"sha256${salt}$" + hashlib.sha256((salt + plain_password).encode("utf-8")).hexdigest()
+            return secrets.compare_digest(expected, hashed_password)
+        elif len(parts) == 2:
+            # Backward compatibility with existing local seeded test hashes
+            salt = "hospital_medpulse_salt_2026"
+            expected = "sha256$" + hashlib.sha256((salt + plain_password).encode("utf-8")).hexdigest()
+            return secrets.compare_digest(expected, hashed_password)
     
     if bcrypt:
         try:

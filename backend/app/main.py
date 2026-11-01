@@ -34,7 +34,12 @@ async def lifespan(app: FastAPI):
         print(f"[Startup Warning] ML Engine warm-up: {e}")
         
     yield
-    # Shutdown logic if required
+    # Shutdown logic: Close MongoDB connection pool cleanly
+    try:
+        from backend.app.db.mongodb import mongo_client_manager
+        mongo_client_manager.close()
+    except Exception as e:
+        print(f"[Shutdown Warning] Error closing MongoDB pool: {e}")
     print("[Shutdown] MedPulse Hospital Management API shutting down cleanly.")
 
 app = FastAPI(
@@ -44,13 +49,18 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS Middleware (Enable seamless communication with React frontend and Streamlit)
+# CORS Middleware: Explicitly whitelist local development and production origins
+cors_origins = settings.cors_origins
+if not cors_origins:
+    cors_origins = ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173", "http://localhost:8501"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
     allow_headers=["*"],
+    expose_headers=["Content-Disposition"]
 )
 
 # Mount all feature routers under /api/v1
@@ -94,6 +104,22 @@ async def root():
 
 @app.get("/api/v1/health")
 async def health_check():
-    return {"status": "healthy", "database": "active", "ml_engine": "ready"}
+    """System health check verifying API status, database connectivity, and ML engine readiness."""
+    from backend.app.database import get_db
+    db = get_db()
+    db_health = db.get_health()
+    return {
+        "status": "healthy",
+        "database": "active" if (db_health.get("connected") or db_health.get("database") in ["active", "fallback"] or db_health.get("fallback_storage", {}).get("available")) else "degraded",
+        "ml_engine": "ready",
+        "database_details": db_health
+    }
+
+@app.get("/api/v1/health/database")
+async def database_health_check():
+    """Dedicated MongoDB Atlas & database tier health check with latency, pooling, and connectivity metrics."""
+    from backend.app.database import get_db
+    db = get_db()
+    return db.get_health()
 
 

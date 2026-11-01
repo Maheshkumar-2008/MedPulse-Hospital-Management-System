@@ -111,20 +111,20 @@ Located in `mysql/`:
 
 ---
 
-## 🔑 Pre-Configured Demo Staff Accounts
-You can immediately log in using any of the pre-configured accounts:
+## 🏥 Authorized Hospital Staff Roles & Access Profiles
+The platform includes role-based profiles corresponding to clinical and administrative departments:
 
-| Role | Employee ID | Full Name | Registered Mobile | Default Password |
+| Role | Employee ID | Full Name | Department | Permissions Scope |
 | :--- | :--- | :--- | :--- | :--- |
-| **Chief Administrator** | `EMP-001` | Dr. Rajesh Varma | `9848022331` | `Admin@123` |
-| **Cardiologist (Doctor)** | `EMP-002` | Dr. Sunita Sharma | `9848022332` | `Staff@123` |
-| **Neurologist (Doctor)** | `EMP-003` | Dr. Anand Reddy | `9848022333` | `Staff@123` |
-| **General Physician** | `EMP-004` | Dr. Priya Nair | `9848022334` | `Staff@123` |
-| **Head Nurse** | `EMP-010` | Nurse Divya Rao | `9848022340` | `Staff@123` |
-| **Receptionist** | `EMP-012` | Rohan Gupta | `9848022342` | `Staff@123` |
-| **Healthcare Data Scientist** | `EMP-014` | Aditya Singh | `9848022344` | `Staff@123` |
+| **Chief Administrator** | `EMP-001` | Dr. Rajesh Varma | Administration | Full hospital management, staff approvals, system configuration |
+| **Cardiologist (Doctor)** | `EMP-002` | Dr. Sunita Sharma | Cardiology | Clinical status tracking, diagnosis, medical records, triage |
+| **Neurologist (Doctor)** | `EMP-003` | Dr. Anand Reddy | Neurology | Neurological admissions, patient status tracking, clinical notes |
+| **General Physician** | `EMP-004` | Dr. Priya Nair | General Medicine | Outpatient consultations, triage, patient management |
+| **Head Nurse** | `EMP-010` | Nurse Divya Rao | Inpatient / Ward | Bed allocations, patient status transitions, admissions/discharges |
+| **Receptionist** | `EMP-012` | Rohan Gupta | Front Desk | Patient registration, billing, appointment routing |
+| **Healthcare Data Analyst**| `EMP-014` | Aditya Singh | Analytics & IT | Hospital KPI dashboards, Scikit-Learn models, clinical reports |
 
-*Note: For mobile OTP sign-in, enter demo code `123456` or click "Send OTP".*
+> **Security Notice**: In accordance with HIPAA/healthcare security standards, credentials and passwords are not published in public documentation. For initial development and evaluation, refer to `.env.example` or contact your system administrator to initialize credentials securely. Two-factor authentication (SMS OTP) requires identity verification.
 
 ---
 

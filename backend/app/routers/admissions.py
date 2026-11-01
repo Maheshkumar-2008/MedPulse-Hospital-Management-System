@@ -7,7 +7,7 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends
 from backend.app.database import get_db
 from backend.app.models.schemas import AdmissionCreate, DischargeCreate
-from backend.app.auth.dependencies import get_current_user
+from backend.app.auth.dependencies import get_current_user, require_roles
 
 router = APIRouter(prefix="/admissions", tags=["Admissions & Discharges"])
 
@@ -63,7 +63,7 @@ async def get_admissions(
         
     return results
 
-@router.post("/admit")
+@router.post("/admit", dependencies=[Depends(require_roles(["Admin", "Doctor", "Nurse", "Receptionist"]))])
 async def admit_patient(adm: AdmissionCreate, current_user: dict = Depends(get_current_user)):
     db = get_db()
     adm_coll = db.get_collection("admissions")
@@ -115,7 +115,7 @@ async def admit_patient(adm: AdmissionCreate, current_user: dict = Depends(get_c
     
     return {"message": "Patient admitted successfully.", "admission_id": aid, "admission": doc}
 
-@router.post("/discharge")
+@router.post("/discharge", dependencies=[Depends(require_roles(["Admin", "Doctor", "Nurse"]))])
 async def discharge_patient(disc: DischargeCreate, current_user: dict = Depends(get_current_user)):
     db = get_db()
     adm_coll = db.get_collection("admissions")

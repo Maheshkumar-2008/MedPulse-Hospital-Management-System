@@ -1,6 +1,6 @@
-# Hospital Patient Data Analysis and Management System
-# Technology Stack Dependencies
+﻿# Hospital Patient Data Analysis and Management System
 
+# Backend
 fastapi>=0.110.0
 uvicorn>=0.28.0
 pydantic>=2.6.0
@@ -9,12 +9,14 @@ python-jose[cryptography]>=3.3.0
 passlib[bcrypt]>=1.7.4
 bcrypt>=4.1.2
 
-# Database Drivers
+# Database
 pymongo>=4.6.0
+dnspython>=2.6.1
+certifi>=2024.2.2
 sqlalchemy>=2.0.28
 mysql-connector-python>=8.3.0
 
-# Data Science & Analytics
+# Data Science and Analytics
 pandas>=2.2.0
 numpy>=1.26.0
 matplotlib>=3.8.0
@@ -22,11 +24,11 @@ seaborn>=0.13.0
 plotly>=5.19.0
 scikit-learn>=1.4.0
 
-# Reports & Document Export
+# Reports and Document Export
 openpyxl>=3.1.2
 reportlab>=4.1.0
 
-# Streamlit Analytics Dashboard
+# Streamlit Dashboard
 streamlit>=1.32.0
 
 # Utilities

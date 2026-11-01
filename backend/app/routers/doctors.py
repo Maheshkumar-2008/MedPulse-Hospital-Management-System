@@ -88,7 +88,7 @@ async def update_doctor(doctor_id: str, updates: DoctorUpdate, current_user: dic
     doc_coll.update_one({"doctor_id": doctor_id}, {"$set": update_data})
     return {"message": f"Doctor {doctor_id} updated successfully."}
 
-@router.post("/assign-patient")
+@router.post("/assign-patient", dependencies=[Depends(require_roles(["Admin", "Doctor", "Nurse", "Receptionist"]))])
 async def assign_doctor_to_patient(
     patient_id: str,
     doctor_id: str,

@@ -20,10 +20,12 @@ def run_tests():
     print("==================================================")
     client = TestClient(app)
 
-    # 1. Health check
+    # 1. Health check & Database Health
     res = client.get("/api/v1/health")
     assert res.status_code == 200, f"Health check failed: {res.text}"
-    print("[PASS] 1. API Health Check OK:", res.json())
+    db_res = client.get("/api/v1/health/database")
+    assert db_res.status_code == 200, f"DB Health check failed: {db_res.text}"
+    print(f"[PASS] 1. API Health Check OK: Status={res.json().get('status')}, DB Engine={db_res.json().get('engine')}")
 
     # 2. Staff Login with EMP-001 (Admin)
     login_payload = {

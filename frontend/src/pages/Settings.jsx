@@ -7,7 +7,7 @@ import {
 
 export const Settings = () => {
   const [dbMode, setDbMode] = useState('MongoDB (Live Engine) with JSON Persistent Fallback');
-  const [mongoUri, setMongoUri] = useState('mongodb://localhost:27017/hospital_management_db');
+  const [mongoUri, setMongoUri] = useState('mongodb+srv://<cluster-endpoint>/hospital_management_db');
   const [backupStatus, setBackupStatus] = useState('');
 
   const handleBackup = () => {

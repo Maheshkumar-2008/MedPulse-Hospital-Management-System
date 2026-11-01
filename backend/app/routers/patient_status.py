@@ -8,7 +8,7 @@ from typing import Optional, List
 from fastapi import APIRouter, HTTPException, Depends, status
 from backend.app.database import get_db
 from backend.app.models.schemas import StatusUpdateRequest
-from backend.app.auth.dependencies import get_current_user
+from backend.app.auth.dependencies import get_current_user, require_roles
 
 router = APIRouter(prefix="/status-tracking", tags=["Patient Status Tracking"])
 
@@ -134,7 +134,7 @@ async def get_patient_status_history(patient_id: str, current_user: dict = Depen
     history = db.get_collection("status_history").find({"patient_id": patient_id}, sort_by="timestamp", reverse=True)
     return history
 
-@router.post("/update")
+@router.post("/update", dependencies=[Depends(require_roles(["Admin", "Doctor", "Nurse", "Receptionist"]))])
 async def update_patient_status(req: StatusUpdateRequest, current_user: dict = Depends(get_current_user)):
     if req.new_status not in VALID_STATUSES:
         raise HTTPException(

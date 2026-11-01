@@ -77,7 +77,7 @@ async def add_bed(bed: BedBase):
     beds_coll.insert_one(doc)
     return {"message": "Bed added successfully.", "bed": doc}
 
-@router.put("/{bed_id}")
+@router.put("/{bed_id}", dependencies=[Depends(require_roles(["Admin", "Doctor", "Nurse", "Receptionist"]))])
 async def update_bed(bed_id: str, updates: BedUpdate, current_user: dict = Depends(get_current_user)):
     db = get_db()
     beds_coll = db.get_collection("beds")
