@@ -1,0 +1,35 @@
+[
+  {
+    "attendance_id": "ATT-001",
+    "employee_id": "EMP-001",
+    "employee_name": "Dr. Rajesh Varma",
+    "attendance_date": "2025-02-25",
+    "check_in_time": "08:45:00",
+    "check_out_time": "17:30:00",
+    "attendance_status": "Present",
+    "remarks": "On time",
+    "_id": "c39c4170-a50d-4478-8802-187b034f202c"
+  },
+  {
+    "attendance_id": "ATT-002",
+    "employee_id": "EMP-002",
+    "employee_name": "Dr. Sunita Sharma",
+    "attendance_date": "2025-02-25",
+    "check_in_time": "09:00:00",
+    "check_out_time": "18:15:00",
+    "attendance_status": "Present",
+    "remarks": "Attended catheterization lab",
+    "_id": "e008dca6-c60f-4723-a403-d5ccbeeec4cf"
+  },
+  {
+    "attendance_id": "ATT-003",
+    "employee_id": "EMP-004",
+    "employee_name": "Dr. Priya Nair",
+    "attendance_date": "2025-02-25",
+    "check_in_time": "08:50:00",
+    "check_out_time": "17:10:00",
+    "attendance_status": "Present",
+    "remarks": "Full OPD duty",
+    "_id": "96641637-e8a0-4116-9572-bd04fe7b7908"
+  }
+]

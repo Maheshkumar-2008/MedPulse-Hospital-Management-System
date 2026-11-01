@@ -1,0 +1,92 @@
+[
+  {
+    "department_id": 1,
+    "department_name": "General Medicine",
+    "head_of_department": "Dr. Priya Nair",
+    "contact_extension": "Ext-101",
+    "floor_number": 1,
+    "total_beds": 30,
+    "_id": "d35a6c1e-c7d9-41db-a6ba-70d3db449f80"
+  },
+  {
+    "department_id": 2,
+    "department_name": "Cardiology",
+    "head_of_department": "Dr. Sunita Sharma",
+    "contact_extension": "Ext-201",
+    "floor_number": 2,
+    "total_beds": 25,
+    "_id": "f9022546-eab3-4a4b-a5a4-db75ae10891b"
+  },
+  {
+    "department_id": 3,
+    "department_name": "Neurology",
+    "head_of_department": "Dr. Anand Reddy",
+    "contact_extension": "Ext-301",
+    "floor_number": 3,
+    "total_beds": 20,
+    "_id": "57d68757-3883-4065-a1fa-b78e927bcc0f"
+  },
+  {
+    "department_id": 4,
+    "department_name": "Orthopedics",
+    "head_of_department": "Dr. Vikram Joshi",
+    "contact_extension": "Ext-401",
+    "floor_number": 4,
+    "total_beds": 25,
+    "_id": "706cf5b4-b403-41cf-a26a-283e8ee1366e"
+  },
+  {
+    "department_id": 5,
+    "department_name": "Pediatrics",
+    "head_of_department": "Dr. Meera Iyer",
+    "contact_extension": "Ext-501",
+    "floor_number": 2,
+    "total_beds": 20,
+    "_id": "c697c493-82c6-4f52-b985-e8940b851eaf"
+  },
+  {
+    "department_id": 6,
+    "department_name": "Dermatology",
+    "head_of_department": "Dr. Sanjay Pillai",
+    "contact_extension": "Ext-601",
+    "floor_number": 1,
+    "total_beds": 15,
+    "_id": "30a6e0fb-d642-4af6-84c5-2cb59b046039"
+  },
+  {
+    "department_id": 7,
+    "department_name": "Gynecology",
+    "head_of_department": "Dr. Kavya Choudhury",
+    "contact_extension": "Ext-701",
+    "floor_number": 3,
+    "total_beds": 25,
+    "_id": "3f71c137-3ef4-47a2-bae1-6b441021cbec"
+  },
+  {
+    "department_id": 8,
+    "department_name": "Emergency",
+    "head_of_department": "Dr. Manish Patel",
+    "contact_extension": "Ext-911",
+    "floor_number": 1,
+    "total_beds": 35,
+    "_id": "e79dfbaa-6f34-4870-8735-c1bc1b1279a9"
+  },
+  {
+    "department_id": 9,
+    "department_name": "Surgery",
+    "head_of_department": "Dr. Suresh Kumar",
+    "contact_extension": "Ext-801",
+    "floor_number": 5,
+    "total_beds": 20,
+    "_id": "efdc63da-f0dd-46fc-88b2-83ef4be00553"
+  },
+  {
+    "department_id": 10,
+    "department_name": "Radiology",
+    "head_of_department": "Dr. Deepak Verma",
+    "contact_extension": "Ext-102",
+    "floor_number": 1,
+    "total_beds": 10,
+    "_id": "5c48bba9-908a-49d3-8630-33e5a0b38751"
+  }
+]

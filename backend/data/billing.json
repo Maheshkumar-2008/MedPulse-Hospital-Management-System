@@ -1,0 +1,58 @@
+[
+  {
+    "bill_id": "BILL-0001",
+    "patient_id": "PAT-0005",
+    "admission_id": "ADM-004",
+    "consultation_charges": 3500.0,
+    "room_charges": 6400.0,
+    "medicine_charges": 4850.0,
+    "laboratory_charges": 3200.0,
+    "other_charges": 1200.0,
+    "total_amount": 19150.0,
+    "payment_status": "Paid",
+    "bill_date": "2025-01-28T11:30:00",
+    "_id": "f808e2df-8e22-47d3-8cc2-06812e7e0480"
+  },
+  {
+    "bill_id": "BILL-0002",
+    "patient_id": "PAT-0002",
+    "admission_id": "ADM-001",
+    "consultation_charges": 5000.0,
+    "room_charges": 15000.0,
+    "medicine_charges": 8500.0,
+    "laboratory_charges": 6500.0,
+    "other_charges": 2000.0,
+    "total_amount": 37000.0,
+    "payment_status": "Partially Paid",
+    "bill_date": "2025-02-16T18:00:00",
+    "_id": "c60ac5c8-7109-4cf8-90b9-1a7364c50006"
+  },
+  {
+    "bill_id": "BILL-0003",
+    "patient_id": "PAT-0001",
+    "admission_id": null,
+    "consultation_charges": 500.0,
+    "room_charges": 0.0,
+    "medicine_charges": 450.0,
+    "laboratory_charges": 800.0,
+    "other_charges": 150.0,
+    "total_amount": 1900.0,
+    "payment_status": "Paid",
+    "bill_date": "2025-02-10T12:45:00",
+    "_id": "cc3c483a-f775-4900-bdbf-3193504f5d92"
+  },
+  {
+    "bill_id": "BILL-0004",
+    "patient_id": "PAT-0003",
+    "admission_id": "ADM-002",
+    "consultation_charges": 4500.0,
+    "room_charges": 12000.0,
+    "medicine_charges": 6000.0,
+    "laboratory_charges": 4500.0,
+    "other_charges": 1500.0,
+    "total_amount": 28500.0,
+    "payment_status": "Pending",
+    "bill_date": "2025-02-17T10:00:00",
+    "_id": "949115a9-1411-46b3-bed8-62711362dd35"
+  }
+]
